@@ -190,7 +190,7 @@ public class Test extends AppCompatActivity {
 
             bluetoothGatt.disconnect();
             devicesDiscovered.clear();
-            
+
             setBack();
 
         }
@@ -383,6 +383,7 @@ public class Test extends AppCompatActivity {
 
         bluetoothGatt = devicesDiscovered.get(connectNO).connectGatt(this, false, btleGattCallback);
 
+
         textView2.setText("高科大娃娃機001");
 
 
@@ -397,9 +398,19 @@ public class Test extends AppCompatActivity {
                 //           確認連接後連接到伺服器進行扣款
                 toServer();
 
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable(){
+
+                    @Override
+                    public void run() {
+
+                        //過1秒後要做的事情
 //            扣款後將啟動按鈕顯示，關閉QRcode掃描按鈕
-                button_yes.setVisibility(View.VISIBLE);
-                button_qrcode.setVisibility(View.INVISIBLE);
+                        button_yes.setVisibility(View.VISIBLE);
+                        button_qrcode.setVisibility(View.INVISIBLE);
+                    }}, 1000);
+
+
             } else if (money_pay < 50) {
                 textView2.setText("餘額不足");
                 bluetoothGatt.disconnect();
