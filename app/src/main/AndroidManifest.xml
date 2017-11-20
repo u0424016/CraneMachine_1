@@ -13,9 +13,9 @@
     <application
         android:name=".GlobalVariable"
         android:allowBackup="true"
-        android:icon="@mipmap/crane"
+        android:icon="@mipmap/pay_icon"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/crane"
+        android:roundIcon="@mipmap/pay_icon"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <activity android:name=".MainActivity">

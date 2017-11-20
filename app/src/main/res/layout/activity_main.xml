@@ -17,22 +17,13 @@
         android:textColor="@android:color/darker_gray" />
 
     <ImageView
-        android:id="@+id/imageView3"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        app:srcCompat="@android:drawable/bottom_bar"
-        android:layout_marginTop="53dp"
-        android:layout_alignTop="@+id/imageView2"
-        android:layout_alignStart="@+id/imageView2" />
-
-    <ImageView
         android:id="@+id/imageView2"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="220dp"
+        android:layout_height="match_parent"
         android:layout_above="@+id/linearLayout2"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="35dp"
-        app:srcCompat="@mipmap/crane" />
+        android:layout_marginBottom="21dp"
+        app:srcCompat="@mipmap/login" />
 
     <LinearLayout
         android:id="@+id/linearLayout2"

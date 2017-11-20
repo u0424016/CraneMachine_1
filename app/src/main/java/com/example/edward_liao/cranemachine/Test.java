@@ -21,6 +21,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -68,7 +69,10 @@ public class Test extends AppCompatActivity {
     Button button_qrcode;
     Button button_yes;
     Button button_back;
+    Button button_help;
     BluetoothGatt bluetoothGatt;
+
+    String Status_temp;
 
     public final static String ACTION_GATT_CONNECTED =
             "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
@@ -97,6 +101,9 @@ public class Test extends AppCompatActivity {
      */
     private GoogleApiClient client;
 
+    int money_pay;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,17 +113,22 @@ public class Test extends AppCompatActivity {
         this.Test = this;
 
 
+        GlobalVariable gv = (GlobalVariable) getApplicationContext();
+
+        money_pay = gv.getMoney_total();
+
+
         button_yes = (Button) findViewById(R.id.sendButton);
         button_yes.setVisibility(View.INVISIBLE);
         button_yes.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+//                寫入狀態給販賣機
                 write();
                 read();
 
 
                 button_yes.setVisibility(View.INVISIBLE);
                 button_back.setVisibility(View.VISIBLE);
-
 
 
             }
@@ -127,8 +139,11 @@ public class Test extends AppCompatActivity {
         button_back.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
-                setBack();
+
                 bluetoothGatt.disconnect();
+                devicesDiscovered.clear();
+                setBack();
+
 
             }
         });
@@ -140,6 +155,15 @@ public class Test extends AppCompatActivity {
                 //先掃描QRCode
                 IntentIntegrator scanIntegrator = new IntentIntegrator(Test);
                 scanIntegrator.initiateScan();
+            }
+        });
+
+        button_help = (Button) findViewById(R.id.button_help);
+        button_help.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+                textView2.setText("請看櫥窗右上方");
+
             }
         });
 
@@ -156,10 +180,26 @@ public class Test extends AppCompatActivity {
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
 
+
+
+    }
+
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+
+            bluetoothGatt.disconnect();
+            devicesDiscovered.clear();
+            
+            setBack();
+
+        }
+        return true;
     }
 
 
-    String ScanContent;
+
+        String ScanContent;
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
@@ -167,7 +207,6 @@ public class Test extends AppCompatActivity {
             String scanContent = scanningResult.getContents();
 
 
-            textView2.setText(scanContent);
             ScanContent = scanContent;
             startScanning();
 
@@ -192,8 +231,9 @@ public class Test extends AppCompatActivity {
                 stopScanning();
             } else {
                 deviceIndex++;
-                textView2.setText("未發現對應裝置");
+
             }
+
         }
     };
 
@@ -343,6 +383,8 @@ public class Test extends AppCompatActivity {
 
         bluetoothGatt = devicesDiscovered.get(connectNO).connectGatt(this, false, btleGattCallback);
 
+        textView2.setText("高科大娃娃機001");
+
 
         //mac address !!!!!!!!!
         temp = devicesDiscovered.get(connectNO).getAddress();
@@ -350,35 +392,42 @@ public class Test extends AppCompatActivity {
         if (temp.equals(ScanContent)) {
 
 
-//           確認連接後連接到伺服器進行扣款
-            toServer();
+            if (money_pay > 49) {
 
-            textView2.setText("高科大娃娃機001");
+                //           確認連接後連接到伺服器進行扣款
+                toServer();
 
 //            扣款後將啟動按鈕顯示，關閉QRcode掃描按鈕
-            button_yes.setVisibility(View.VISIBLE);
-            button_qrcode.setVisibility(View.INVISIBLE);
+                button_yes.setVisibility(View.VISIBLE);
+                button_qrcode.setVisibility(View.INVISIBLE);
+            } else if (money_pay < 50) {
+                textView2.setText("餘額不足");
+                bluetoothGatt.disconnect();
+                button_back.setVisibility(View.VISIBLE);
+                button_qrcode.setVisibility(View.INVISIBLE);
+
+            }
 
 
         }
 
+
     }
 
 
-
-//
+    //
     public void write() {
         BluetoothGattCharacteristic myCharacteristic = bluetoothGatt.getService(RX_SERVICE_UUID).getCharacteristic(RX_CHAR_UUID);
-      /*  char a = (char) 0x07;
+        char a = (char) 0x07;
         int[] stringValueOf = {0x07, 0x58, 0x83, 0x13, 0x7f, 0x4f, 0x11, 0x3e, 0x67, 0x10, 0xdf, 0xe5, 0x6d, 0x01, 0xe5, 0x75};
         byte data[] = new byte[16];
         for (int i = 0; i < 16; i++) {
             data[i] = (byte) stringValueOf[i];
 
         }
-*/
+
         // System.out.print(data);
-        myCharacteristic.setValue("1111111111111111");
+        myCharacteristic.setValue(data);
         System.out.println("Start! ");
         bluetoothGatt.writeCharacteristic(myCharacteristic);
         System.out.println("RX:" + myCharacteristic);
@@ -435,9 +484,6 @@ public class Test extends AppCompatActivity {
     }
 
 
-    String Status_temp;
-    int money_pay;
-
     //傳送付款資訊給server
     public void toServer() {
 
@@ -483,13 +529,12 @@ public class Test extends AppCompatActivity {
                         gv.setMoney_total(money_pay);
 
 
+                        System.out.println("交易狀態");
                         System.out.println(Status);
                         System.out.print("目前餘額：");
                         System.out.println(money_pay);
 
 
-                    } else {
-                        textView2.setText("交易失敗");
                     }
 
 
@@ -505,10 +550,17 @@ public class Test extends AppCompatActivity {
 
     public void setBack() {
 
+        devicesDiscovered.clear();
+
+
 
         finish();
         Intent back = new Intent(this, FunctionActivity.class);
         startActivity(back);
+    }
+
+    public void setHelp(View view){
+
     }
 
     @Override

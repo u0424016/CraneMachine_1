@@ -349,12 +349,11 @@ public class Pay extends AppCompatActivity {
 
         }
 
+
+
     }
 
     String success_info;
-
-
-
 
 
     public void get_info_from_BLE() {
@@ -490,16 +489,16 @@ public class Pay extends AppCompatActivity {
     //    資訊寫入ＢＬＥ讓販賣機動
     public void write() {
         BluetoothGattCharacteristic myCharacteristic = bluetoothGatt.getService(RX_SERVICE_UUID).getCharacteristic(RX_CHAR_UUID);
-      /*  char a = (char) 0x07;
+        char a = (char) 0x07;
         int[] stringValueOf = {0x07, 0x58, 0x83, 0x13, 0x7f, 0x4f, 0x11, 0x3e, 0x67, 0x10, 0xdf, 0xe5, 0x6d, 0x01, 0xe5, 0x75};
         byte data[] = new byte[16];
         for (int i = 0; i < 16; i++) {
             data[i] = (byte) stringValueOf[i];
 
         }
-*/
+
         // System.out.print(data);
-        myCharacteristic.setValue("1111111111111111");
+        myCharacteristic.setValue("data");
         System.out.println("Start! ");
         bluetoothGatt.writeCharacteristic(myCharacteristic);
         System.out.println("RX:" + myCharacteristic);
@@ -551,7 +550,6 @@ public class Pay extends AppCompatActivity {
             }
         }
     }
-
 
 
     @Override

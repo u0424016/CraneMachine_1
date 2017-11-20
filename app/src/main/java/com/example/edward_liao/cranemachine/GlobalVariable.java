@@ -7,7 +7,7 @@ import android.app.Application;
 
 public class GlobalVariable extends Application {
 
-    private int money_total = 10000;
+    private int money_total;
 
     public void setMoney_total(int money_total) {
         this.money_total = money_total;

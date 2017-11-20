@@ -7,12 +7,18 @@
     android:orientation="vertical"
     tools:context="com.example.edward_liao.cranemachine.Test">
 
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="match_parent"
+        android:layout_height="285dp"
+        app:srcCompat="@mipmap/qr" />
+
     <Button
         android:id="@+id/button_qrcode"
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="QRCode" />
+        android:text="請掃描QRCode" />
 
     <TextView
         android:id="@+id/textView2"
@@ -20,7 +26,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignStart="@+id/button_qrcode"
-        android:text="請掃描QRCode"
         android:textAlignment="center" />
 
     <Button
@@ -40,5 +45,13 @@
         android:text="離開"
         tools:layout_editor_absoluteX="198dp"
         tools:layout_editor_absoluteY="168dp" />
+
+    <Button
+        android:id="@+id/button_help"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:onClick="setHelp"
+        android:text="找不到QRcode?" />
 
 </LinearLayout>
