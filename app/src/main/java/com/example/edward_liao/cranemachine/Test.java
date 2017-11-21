@@ -180,8 +180,6 @@ public class Test extends AppCompatActivity {
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
 
-
-
     }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -198,8 +196,7 @@ public class Test extends AppCompatActivity {
     }
 
 
-
-        String ScanContent;
+    String ScanContent;
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
@@ -399,7 +396,7 @@ public class Test extends AppCompatActivity {
                 toServer();
 
                 Handler handler = new Handler();
-                handler.postDelayed(new Runnable(){
+                handler.postDelayed(new Runnable() {
 
                     @Override
                     public void run() {
@@ -408,7 +405,8 @@ public class Test extends AppCompatActivity {
 //            扣款後將啟動按鈕顯示，關閉QRcode掃描按鈕
                         button_yes.setVisibility(View.VISIBLE);
                         button_qrcode.setVisibility(View.INVISIBLE);
-                    }}, 1000);
+                    }
+                }, 1000);
 
 
             } else if (money_pay < 50) {
@@ -442,6 +440,21 @@ public class Test extends AppCompatActivity {
         System.out.println("Start! ");
         bluetoothGatt.writeCharacteristic(myCharacteristic);
         System.out.println("RX:" + myCharacteristic);
+
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+
+                //過5秒後要做的事情
+//            直接斷開藍牙裝置及清除列表後返回功能頁面
+                bluetoothGatt.disconnect();
+                devicesDiscovered.clear();
+
+                setBack();
+            }
+        }, 5000);
 
 
     }
@@ -564,13 +577,12 @@ public class Test extends AppCompatActivity {
         devicesDiscovered.clear();
 
 
-
         finish();
         Intent back = new Intent(this, FunctionActivity.class);
         startActivity(back);
     }
 
-    public void setHelp(View view){
+    public void setHelp(View view) {
 
     }
 
