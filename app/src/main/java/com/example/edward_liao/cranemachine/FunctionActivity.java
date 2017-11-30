@@ -21,6 +21,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
+import static com.example.edward_liao.cranemachine.MainActivity.loginManager;
+
 public class FunctionActivity extends AppCompatActivity {
 
     Button pay, balance, deposit, withdraw, transfer, changepassword, logout;
@@ -28,6 +30,11 @@ public class FunctionActivity extends AppCompatActivity {
     int money_total;
 
     String Status_temp;
+
+    String cmtoken;
+    String cmuid;
+
+    String get_url;
 
 
     @Override
@@ -37,7 +44,15 @@ public class FunctionActivity extends AppCompatActivity {
 
         first();
 
-        getBalance();
+
+        GlobalVariable gv = (GlobalVariable) getApplicationContext();
+
+
+        String url = "http://163.18.2.157/balance/";
+        cmuid = gv.getCM_ID();
+
+        get_url = url + cmuid;
+                getBalance();
 
     }
 
@@ -119,6 +134,7 @@ public class FunctionActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog,
                                                 int which) {
                                 //確定登出
+                                loginManager.logOut();
                                 Logout();
                                 // TODO Auto-generated method stub
                             }
@@ -158,7 +174,7 @@ public class FunctionActivity extends AppCompatActivity {
 
                     //建立POST Request
                     HttpClient httpClient = new DefaultHttpClient();
-                    HttpGet get = new HttpGet("http://163.18.2.157/balance/1");
+                    HttpGet get = new HttpGet(get_url);
 
 
                     //執行Get
@@ -192,14 +208,12 @@ public class FunctionActivity extends AppCompatActivity {
         }.execute(null, null, null);
 
 
-
-
-
     }
 
 
     //登出
     public void Logout() {
+
 
         finish();
         Intent Login = new Intent(this, MainActivity.class);

@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">高科校園行動支付</string>
+
+
+
+        <string name="hello_world">Hello world!</string>
+        <string name="action_settings">Settings</string>
+        <string name="facebook_app_id">877172669096674</string>
+    <string name="fb_login_protocol_scheme">fb877172669096674</string>
+
 </resources>

@@ -30,6 +30,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.facebook.CallbackManager;
+import com.facebook.login.LoginManager;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -88,6 +90,11 @@ public class Pay extends AppCompatActivity {
     private TextView textView_enter;
     int money_pay, enter;
     private Activity pay;
+
+
+    GlobalVariable gv = (GlobalVariable) getApplicationContext();
+    String cmtoken = gv.getCM_Token();
+    String cmuid = gv.getCM_ID();
 
 
     // 10秒之後將停止搜尋
@@ -350,7 +357,6 @@ public class Pay extends AppCompatActivity {
         }
 
 
-
     }
 
     String success_info;
@@ -421,6 +427,8 @@ public class Pay extends AppCompatActivity {
                     //建立要傳送的JSON物件
                     JSONObject json = new JSONObject();
                     json.put("data", "0bb685c846654441db1a1ba03aa2a9f0531db1c49b5c02d8d1d37c2ff94eab73");
+                    json.put("CMtoken", cmtoken);
+                    json.put("CMUID", cmuid);
 
 
                     //建立POST Request
@@ -439,6 +447,7 @@ public class Pay extends AppCompatActivity {
                     JSONObject responseJSON = new JSONObject(responseString);
                     //取得Message的屬性
                     String Status = responseJSON.getString("Status");
+                    String Key = responseJSON.getString("Key");
                     int Balance = responseJSON.getInt("balance");
 
                     Status_temp = Status;

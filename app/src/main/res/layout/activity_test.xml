@@ -47,6 +47,15 @@
         tools:layout_editor_absoluteY="168dp" />
 
     <Button
+        android:id="@+id/button_back2"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="離開"
+        tools:layout_editor_absoluteX="198dp"
+        tools:layout_editor_absoluteY="168dp" />
+
+    <Button
         android:id="@+id/button_help"
         style="@style/Widget.AppCompat.Button.Borderless.Colored"
         android:layout_width="match_parent"

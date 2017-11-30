@@ -85,7 +85,14 @@
                 android:layout_weight="1"
                 android:onClick="setClean"
                 android:text="重新輸入" />
+
         </LinearLayout>
+
+        <com.facebook.login.widget.LoginButton
+            android:id="@+id/login_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal" />
 
         <Button
             android:id="@+id/button_forgot"

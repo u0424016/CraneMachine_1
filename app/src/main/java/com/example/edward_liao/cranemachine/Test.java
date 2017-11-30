@@ -27,6 +27,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.CallbackManager;
+import com.facebook.login.LoginManager;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -48,6 +50,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.example.edward_liao.cranemachine.MainActivity.loginManager;
+
 public class Test extends AppCompatActivity {
 
     private Activity Test;
@@ -68,7 +72,7 @@ public class Test extends AppCompatActivity {
 
     Button button_qrcode;
     Button button_yes;
-    Button button_back;
+    Button button_back,button_back2;
     Button button_help;
     BluetoothGatt bluetoothGatt;
 
@@ -103,6 +107,9 @@ public class Test extends AppCompatActivity {
 
     int money_pay;
 
+    String cmtoken;
+    String cmuid;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,6 +122,11 @@ public class Test extends AppCompatActivity {
 
         GlobalVariable gv = (GlobalVariable) getApplicationContext();
 
+        cmtoken = gv.getCM_Token();
+        cmuid = gv.getCM_ID();
+
+
+
         money_pay = gv.getMoney_total();
 
 
@@ -124,7 +136,7 @@ public class Test extends AppCompatActivity {
             public void onClick(View v) {
 //                寫入狀態給販賣機
                 write();
-                read();
+//                read();
 
 
                 button_yes.setVisibility(View.INVISIBLE);
@@ -148,6 +160,19 @@ public class Test extends AppCompatActivity {
             }
         });
 
+
+        button_back2 = (Button) findViewById(R.id.button_back2);
+        button_back2.setVisibility(View.VISIBLE);
+        button_back2.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+
+
+                setBack();
+
+
+            }
+        });
 
         button_qrcode = (Button) findViewById(R.id.button_qrcode);
         button_qrcode.setOnClickListener(new View.OnClickListener() {
@@ -182,18 +207,15 @@ public class Test extends AppCompatActivity {
 
     }
 
+    //禁用系統返回鍵
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-
-            bluetoothGatt.disconnect();
-            devicesDiscovered.clear();
-
-            setBack();
-
+            return true;
         }
-        return true;
+        return false;
     }
+
+
 
 
     String ScanContent;
@@ -390,7 +412,7 @@ public class Test extends AppCompatActivity {
         if (temp.equals(ScanContent)) {
 
 
-            if (money_pay > 49) {
+            if (money_pay > 19) {
 
                 //           確認連接後連接到伺服器進行扣款
                 toServer();
@@ -409,7 +431,7 @@ public class Test extends AppCompatActivity {
                 }, 1000);
 
 
-            } else if (money_pay < 50) {
+            } else if (money_pay < 20) {
                 textView2.setText("餘額不足");
                 bluetoothGatt.disconnect();
                 button_back.setVisibility(View.VISIBLE);
@@ -449,9 +471,7 @@ public class Test extends AppCompatActivity {
 
                 //過5秒後要做的事情
 //            直接斷開藍牙裝置及清除列表後返回功能頁面
-                bluetoothGatt.disconnect();
-                devicesDiscovered.clear();
-
+                disconnectDeviceSelected();
                 setBack();
             }
         }, 5000);
@@ -471,10 +491,10 @@ public class Test extends AppCompatActivity {
 
     }
 
-
+//            斷開藍牙裝置及清除列表
     public void disconnectDeviceSelected() {
         bluetoothGatt.disconnect();
-    }
+        devicesDiscovered.clear();    }
 
     private void displayGattServices(List<BluetoothGattService> gattServices) {
         if (gattServices == null) return;
@@ -508,6 +528,8 @@ public class Test extends AppCompatActivity {
     }
 
 
+
+
     //傳送付款資訊給server
     public void toServer() {
 
@@ -522,6 +544,8 @@ public class Test extends AppCompatActivity {
                     //建立要傳送的JSON物件
                     JSONObject json = new JSONObject();
                     json.put("data", "0bb685c846654441db1a1ba03aa2a9f0531db1c49b5c02d8d1d37c2ff94eab73");
+                    json.put("CMtoken", cmtoken);
+                    json.put("CMUID", cmuid);
 
 
                     //建立POST Request
@@ -540,6 +564,7 @@ public class Test extends AppCompatActivity {
                     JSONObject responseJSON = new JSONObject(responseString);
                     //取得Message的屬性
                     String Status = responseJSON.getString("Status");
+                    String Key = responseJSON.getString("Key");
                     int Balance = responseJSON.getInt("balance");
 
                     Status_temp = Status;
@@ -573,8 +598,6 @@ public class Test extends AppCompatActivity {
     }
 
     public void setBack() {
-
-        devicesDiscovered.clear();
 
 
         finish();
