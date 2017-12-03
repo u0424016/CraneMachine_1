@@ -1,5 +1,4 @@
-package com.example.edward_liao.cranemachine;
-
+package com.nkfust.edward_liao.cranemachine;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -17,7 +16,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -29,13 +27,11 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-import com.facebook.CallbackManager;
-import com.facebook.login.LoginManager;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.zxing.integration.android.*;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -44,8 +40,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONObject;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,12 +49,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-
 public class Pay extends AppCompatActivity {
+
+    private Activity Test;
+
+
     BluetoothManager btManager;
     BluetoothAdapter btAdapter;
     BluetoothLeScanner btScanner;
-    BluetoothGatt bluetoothGatt;
+    TextView textView2;
 
     private final static int REQUEST_ENABLE_BT = 1;
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
@@ -67,6 +66,14 @@ public class Pay extends AppCompatActivity {
     int deviceIndex = 0;
     //存放藍芽設備的陣列
     ArrayList<BluetoothDevice> devicesDiscovered = new ArrayList<BluetoothDevice>();
+
+    Button button_qrcode;
+    Button button_yes;
+    Button button_back, button_back2;
+    Button button_help;
+    BluetoothGatt bluetoothGatt;
+
+    String Status_temp;
 
     public final static String ACTION_GATT_CONNECTED =
             "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
@@ -86,17 +93,6 @@ public class Pay extends AppCompatActivity {
     public static final UUID TX_CHAR_UUID = UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
 
 
-    private Button button_qrcode, button_yes, button_cancel;
-    private TextView textView_enter;
-    int money_pay, enter;
-    private Activity pay;
-
-
-    GlobalVariable gv = (GlobalVariable) getApplicationContext();
-    String cmtoken = gv.getCM_Token();
-    String cmuid = gv.getCM_ID();
-
-
     // 10秒之後將停止搜尋
     private Handler mHandler = new Handler();
     private static final long SCAN_PERIOD = 10000;
@@ -104,8 +100,12 @@ public class Pay extends AppCompatActivity {
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
-
     private GoogleApiClient client;
+
+    int money_pay;
+
+    String cmtoken;
+    String cmuid;
 
 
     @Override
@@ -113,7 +113,104 @@ public class Pay extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pay);
 
-        first();
+        this.textView2 = (TextView) findViewById(R.id.textView2);
+        this.Test = this;
+
+
+        GlobalVariable gv = (GlobalVariable) getApplicationContext();
+
+        cmtoken = gv.getCM_Token();
+        cmuid = gv.getCM_ID();
+
+
+        money_pay = gv.getMoney_total();
+
+
+        button_yes = (Button) findViewById(R.id.sendButton);
+        button_yes.setVisibility(View.INVISIBLE);
+        button_yes.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+                toServer();
+
+                textView2.setText("付款成功");
+
+
+
+
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+
+                        //過1秒後要做的事情
+
+                        textView2.setText("連接中，請稍候");
+
+//                寫入狀態給販賣機
+                        write();
+                        textView2.setText("已連接");
+
+                    }
+                }, 1000);
+
+
+//                read();
+
+
+                button_yes.setVisibility(View.INVISIBLE);
+                button_back.setVisibility(View.VISIBLE);
+                button_back2.setVisibility(View.INVISIBLE);
+
+
+            }
+        });
+
+        button_back = (Button) findViewById(R.id.button_back);
+        button_back.setVisibility(View.INVISIBLE);
+        button_back.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+
+                bluetoothGatt.disconnect();
+                devicesDiscovered.clear();
+                setBack();
+
+
+            }
+        });
+
+
+        button_back2 = (Button) findViewById(R.id.button_back2);
+        button_back2.setVisibility(View.VISIBLE);
+        button_back2.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+
+                setBack();
+
+
+            }
+        });
+
+        button_qrcode = (Button) findViewById(R.id.button_qrcode);
+        button_qrcode.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                //先掃描QRCode
+                IntentIntegrator scanIntegrator = new IntentIntegrator(Test);
+                scanIntegrator.initiateScan();
+            }
+        });
+
+        button_help = (Button) findViewById(R.id.button_help);
+        button_help.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+                textView2.setText("請再認真找找");
+
+            }
+        });
 
 
         btManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
@@ -124,44 +221,52 @@ public class Pay extends AppCompatActivity {
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
         }
+
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
 
     }
 
-    String MacAddress;
+    //禁用系統返回鍵
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            return true;
+        }
+        return false;
+    }
+
+
+    String ScanContent;
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
         if (scanningResult != null) {
             String scanContent = scanningResult.getContents();
-//印出讀取到的值
-            System.out.print(scanContent);
 
-
-//            String str = "{\n" + "\"MacAddress\": \"DC:36:99:F8:D2:3C\",\n" + "\"Price\": 50\n" + "}";
 
             try {
                 JSONObject jsonObject = new JSONObject(scanContent);
 
-                MacAddress = jsonObject.getString("MacAddress");
+                String MacAddress = jsonObject.getString("MacAddress");
+
+                ScanContent = MacAddress;
 
 
             } catch (JSONException e) {
                 e.printStackTrace();
 
+
             }
+
             startScanning();
-
-
-            String temp = "金額為" + enter + "元";
-            textView_enter.setText(temp);
 
 
         } else {
             Toast.makeText(getApplicationContext(), "nothing", Toast.LENGTH_SHORT).show();
         }
+
     }
+
 
     int connectNO;
     // Device scan callback.
@@ -170,13 +275,15 @@ public class Pay extends AppCompatActivity {
         public void onScanResult(int callbackType, ScanResult result) {
             devicesDiscovered.add(result.getDevice());
 
-            if (result.getDevice().getAddress().toString().equals(MacAddress)) {
+            if (result.getDevice().getAddress().toString().equals(ScanContent)) {
                 connectNO = deviceIndex;
                 connectToDeviceSelected();
                 stopScanning();
             } else {
                 deviceIndex++;
+
             }
+
         }
     };
 
@@ -186,10 +293,6 @@ public class Pay extends AppCompatActivity {
 
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
-
-            broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
-
-
             // this will get called anytime you perform a read or write characteristic operation
             Pay.this.runOnUiThread(new Runnable() {
                 public void run() {
@@ -219,6 +322,7 @@ public class Pay extends AppCompatActivity {
                     // discover services and characteristics for this device
                     bluetoothGatt.discoverServices();
                     write();
+//                    read();
 
 
                     break;
@@ -242,36 +346,24 @@ public class Pay extends AppCompatActivity {
 
         }
 
-
         @Override
         // Result of a characteristic read operation
         public void onCharacteristicRead(BluetoothGatt gatt,
                                          BluetoothGattCharacteristic characteristic,
                                          int status) {
-
-            //讀取到值，在這裏讀數據
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+                System.out.print(characteristic);
+
             }
 
-
         }
-
-
     };
-    String get_info_from_BLE;
 
     private void broadcastUpdate(final String action,
                                  final BluetoothGattCharacteristic characteristic) {
-        System.out.print("目前連接：");
+
+
         System.out.println(characteristic.getUuid());
-
-        get_info_from_BLE = characteristic.getValue().toString();
-
-        System.out.print("讀到的值是");
-        System.out.println(get_info_from_BLE);
-
-
     }
 
     @Override
@@ -300,7 +392,7 @@ public class Pay extends AppCompatActivity {
     }
 
     public void startScanning() {
-        System.out.println("＊＊＊開始掃描＊＊＊");
+        System.out.println("start scanning");
         btScanning = true;
         deviceIndex = 0;
         devicesDiscovered.clear();
@@ -323,7 +415,7 @@ public class Pay extends AppCompatActivity {
     }
 
     public void stopScanning() {
-        System.out.println("＊＊＊停止掃描＊＊＊");
+        System.out.println("stopping scanning");
         //     peripheralTextView.append("Stopped Scanning\n");
         btScanning = false;
 
@@ -341,161 +433,56 @@ public class Pay extends AppCompatActivity {
 
         bluetoothGatt = devicesDiscovered.get(connectNO).connectGatt(this, false, btleGattCallback);
 
-        toServer();
+
+        textView2.setText("高科大娃娃機");
 
 
         //mac address !!!!!!!!!
         temp = devicesDiscovered.get(connectNO).getAddress();
 
-        if (temp.equals(MacAddress)) {
-
-            toServer();
-
-            button_yes.setVisibility(View.VISIBLE);
+        if (temp.equals(ScanContent)) {
 
 
-        }
+            if (money_pay > 19) {
+
+                //           確認連接後連接到伺服器進行扣款
+//                toServer();
+
+                button_yes.setVisibility(View.VISIBLE);
+                button_qrcode.setVisibility(View.INVISIBLE);
 
 
-    }
 
-    String success_info;
-
-
-    public void get_info_from_BLE() {
-
-        BluetoothGattCharacteristic myCharacteristic = bluetoothGatt.getService(RX_SERVICE_UUID).getCharacteristic(TX_CHAR_UUID);
-
-
-    }
-
-
-    //禁用系統返回鍵
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            return true;
-        }
-        return false;
-    }
+//                Handler handler = new Handler();
+//                handler.postDelayed(new Runnable() {
+//
+//                    @Override
+//                    public void run() {
+//
+//                        //過1秒後要做的事情
+////            扣款後將啟動按鈕顯示，關閉QRcode掃描按鈕
+//
+//                    }
+//                }, 1000);
 
 
-    public void first() {
+            } else if (money_pay < 20) {
+                textView2.setText("餘額不足");
+                bluetoothGatt.disconnect();
+                no_money();
+                button_back.setVisibility(View.VISIBLE);
+                button_qrcode.setVisibility(View.INVISIBLE);
 
-        this.pay = this;
-
-        button_qrcode = (Button) findViewById(R.id.button_qrcode);
-        button_yes = (Button) findViewById(R.id.button_yes);
-        button_cancel = (Button) findViewById(R.id.button_cancel);
-        textView_enter = (TextView) findViewById(R.id.textView_enter);
-    }
-
-
-    public void setButton_qrcode(View view) {
-        IntentIntegrator scanIntegrator = new IntentIntegrator(pay);
-        scanIntegrator.initiateScan();
-        button_qrcode.setVisibility(View.INVISIBLE);
-
-    }
-
-
-    public void setButton_yes(View view) {
-
-        setStatus();
-
-    }
-
-
-    //回到功能頁面
-    public void setButton_cancel(View view) {
-        setBack();
-    }
-
-
-    String Status_temp;
-
-    //傳送付款資訊給server
-    public void toServer() {
-
-
-        new AsyncTask<Void, Void, Void>() {
-
-            @Override
-            protected Void doInBackground(Void... params) {
-                // TODO Auto-generated method stub
-
-                try {
-                    //建立要傳送的JSON物件
-                    JSONObject json = new JSONObject();
-                    json.put("data", "0bb685c846654441db1a1ba03aa2a9f0531db1c49b5c02d8d1d37c2ff94eab73");
-                    json.put("CMtoken", cmtoken);
-                    json.put("CMUID", cmuid);
-
-
-                    //建立POST Request
-                    HttpClient httpClient = new DefaultHttpClient();
-                    HttpPost httpPost = new HttpPost("http://163.18.2.157:80/pay");
-                    //JSON物件放到POST Request
-                    StringEntity stringEntity = new StringEntity(json.toString());
-                    stringEntity.setContentType("application/json");
-                    httpPost.setEntity(stringEntity);
-                    //執行POST Request
-                    HttpResponse httpResponse = httpClient.execute(httpPost);
-                    //取得回傳的內容
-                    HttpEntity httpEntity = httpResponse.getEntity();
-                    String responseString = EntityUtils.toString(httpEntity, "UTF-8");
-                    //回傳的內容轉存為JSON物件
-                    JSONObject responseJSON = new JSONObject(responseString);
-                    //取得Message的屬性
-                    String Status = responseJSON.getString("Status");
-                    String Key = responseJSON.getString("Key");
-                    int Balance = responseJSON.getInt("balance");
-
-                    Status_temp = Status;
-
-
-                    if (Status.equals("Success")) {
-                        GlobalVariable gv = (GlobalVariable) getApplicationContext();
-
-                        money_pay = Balance;
-
-                        gv.setMoney_total(money_pay);
-
-
-                        System.out.println(Status);
-                        System.out.print("目前餘額：");
-                        System.out.println(money_pay);
-
-
-                    } else {
-                        textView_enter.setText("交易失敗");
-                    }
-
-
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                return null;
             }
-        }.execute(null, null, null);
-
-    }
-
-    public void setStatus() {
-
-        System.out.println("付款成功");
-
-        write();
 
 
-//                中斷藍牙裝置
-        bluetoothGatt.disconnect();
-        setBack();
+        }
 
 
     }
 
-    //    資訊寫入ＢＬＥ讓販賣機動
+
+    //
     public void write() {
         BluetoothGattCharacteristic myCharacteristic = bluetoothGatt.getService(RX_SERVICE_UUID).getCharacteristic(RX_CHAR_UUID);
         char a = (char) 0x07;
@@ -507,26 +494,43 @@ public class Pay extends AppCompatActivity {
         }
 
         // System.out.print(data);
-        myCharacteristic.setValue("data");
+        myCharacteristic.setValue(data);
         System.out.println("Start! ");
         bluetoothGatt.writeCharacteristic(myCharacteristic);
         System.out.println("RX:" + myCharacteristic);
 
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+
+                //過5秒後要做的事情
+//            直接斷開藍牙裝置及清除列表後返回功能頁面
+                disconnectDeviceSelected();
+                setBack();
+            }
+        }, 5000);
+
 
     }
+/*
+    public void read() {
+        BluetoothGattCharacteristic myCharacteristic = bluetoothGatt.getService(RX_SERVICE_UUID).getCharacteristic(TX_CHAR_UUID);
+
+        bluetoothGatt.readCharacteristic(myCharacteristic);
+        myCharacteristic.getValue();
 
 
-    //回到功能頁面
-    public void setBack() {
+        System.out.println("TX:" + myCharacteristic.getValue());
 
 
-        finish();
-        Intent back = new Intent(this, FunctionActivity.class);
-        startActivity(back);
-    }
+    }*/
 
+    //            斷開藍牙裝置及清除列表
     public void disconnectDeviceSelected() {
         bluetoothGatt.disconnect();
+        devicesDiscovered.clear();
     }
 
     private void displayGattServices(List<BluetoothGattService> gattServices) {
@@ -561,6 +565,99 @@ public class Pay extends AppCompatActivity {
     }
 
 
+    //傳送付款資訊給server
+    public void toServer() {
+
+
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                // TODO Auto-generated method stub
+
+                try {
+                    //建立要傳送的JSON物件
+                    JSONObject json = new JSONObject();
+                    json.put("data", "7c4cd77c8fdb327126eac5e6d1fec59666614f8d5ef6d22ca2cd89b7846034c02e0f4701c15e270e30a565291845bbdad87a7f65cbc8f6ece1faa5c2be226bc4");
+                    json.put("CMtoken", cmtoken);
+                    json.put("CMUID", cmuid);
+
+
+                    //建立POST Request
+                    HttpClient httpClient = new DefaultHttpClient();
+                    HttpPost httpPost = new HttpPost("http://163.18.2.157:80/pay");
+                    //JSON物件放到POST Request
+                    StringEntity stringEntity = new StringEntity(json.toString());
+                    stringEntity.setContentType("application/json");
+                    httpPost.setEntity(stringEntity);
+                    //執行POST Request
+                    HttpResponse httpResponse = httpClient.execute(httpPost);
+                    //取得回傳的內容
+                    HttpEntity httpEntity = httpResponse.getEntity();
+                    String responseString = EntityUtils.toString(httpEntity, "UTF-8");
+                    //回傳的內容轉存為JSON物件
+                    JSONObject responseJSON = new JSONObject(responseString);
+                    //取得Message的屬性
+                    String Status = responseJSON.getString("Status");
+                    String Key = responseJSON.getString("Key");
+                    int Balance = responseJSON.getInt("balance");
+
+                    Status_temp = Status;
+
+
+                    if (Status.equals("Success")) {
+                        GlobalVariable gv = (GlobalVariable) getApplicationContext();
+
+                        money_pay = Balance;
+
+                        gv.setMoney_total(money_pay);
+
+
+                        System.out.println("交易狀態");
+                        System.out.println(Status);
+                        System.out.print("目前餘額：");
+                        System.out.println(money_pay);
+
+
+                    }
+
+
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        }.execute(null, null, null);
+
+    }
+
+    public void no_money() {
+        new AlertDialog.Builder(Pay.this)
+                .setTitle("錯誤")
+                .setMessage("餘額不足")
+                .setPositiveButton("確認", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        disconnectDeviceSelected();
+                        setBack();
+                    }
+                })
+                .show();
+    }
+
+    public void setBack() {
+
+
+        finish();
+        Intent back = new Intent(this, FunctionActivity.class);
+        startActivity(back);
+    }
+
+    public void setHelp(View view) {
+
+    }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -574,7 +671,7 @@ public class Pay extends AppCompatActivity {
                 // Otherwise, set the URL to null.
                 Uri.parse("http://host/path"),
                 // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://com.example.edward_liao.cranemachine/http/host/path")
+                Uri.parse("android-app://com.nkfust.edward_liao.cranemachine/http/host/path")
         );
         AppIndex.AppIndexApi.start(client, viewAction);
     }
@@ -591,10 +688,9 @@ public class Pay extends AppCompatActivity {
                 // Otherwise, set the URL to null.
                 Uri.parse("http://host/path"),
                 // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://com.example.edward_liao.cranemachine/http/host/path")
+                Uri.parse("android-app://com.nkfust.edward_liao.cranemachine/http/host/path")
         );
         AppIndex.AppIndexApi.end(client, viewAction);
         client.disconnect();
     }
-
 }

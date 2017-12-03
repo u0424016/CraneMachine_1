@@ -1,12 +1,12 @@
-package com.example.edward_liao.cranemachine;
+package com.nkfust.edward_liao.cranemachine;
 
 import android.app.AlertDialog;
-import android.app.Application;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
@@ -15,17 +15,15 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
-import static com.example.edward_liao.cranemachine.MainActivity.loginManager;
+import static com.nkfust.edward_liao.cranemachine.MainActivity.loginManager;
 
 public class FunctionActivity extends AppCompatActivity {
 
-    Button pay, balance, deposit, withdraw, transfer, changepassword, logout;
+    Button pay, balance, deposit, withdraw, transfer, changepassword,binding, logout;
 
     int money_total;
 
@@ -48,11 +46,13 @@ public class FunctionActivity extends AppCompatActivity {
         GlobalVariable gv = (GlobalVariable) getApplicationContext();
 
 
-        String url = "http://163.18.2.157/balance/";
+        String url = "http://163.18.2.157/balance/ID/";
         cmuid = gv.getCM_ID();
 
         get_url = url + cmuid;
-                getBalance();
+        Log.d("TAG", get_url);
+
+        getBalance();
 
     }
 
@@ -81,7 +81,7 @@ public class FunctionActivity extends AppCompatActivity {
     //前往付款畫面
     public void setPay(View view) {
         finish();
-        Intent PayActivity = new Intent(this, Test.class);
+        Intent PayActivity = new Intent(this, Pay.class);
         startActivity(PayActivity);
 
     }
@@ -157,6 +157,12 @@ public class FunctionActivity extends AppCompatActivity {
         finish();
         Intent changepassword = new Intent(this, ChangePasswordActivity.class);
         startActivity(changepassword);
+    }
+
+    public void setBinding(View view) {
+        finish();
+        Intent binding = new Intent(this, Binding.class);
+        startActivity(binding);
     }
 
 

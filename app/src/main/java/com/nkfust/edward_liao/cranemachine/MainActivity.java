@@ -1,10 +1,11 @@
-package com.example.edward_liao.cranemachine;
+package com.nkfust.edward_liao.cranemachine;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,7 +16,6 @@ import android.widget.EditText;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
-import com.facebook.FacebookActivity;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
@@ -26,7 +26,6 @@ import com.facebook.Profile;
 import com.facebook.login.LoginBehavior;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
-import com.facebook.login.widget.LoginButton;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -41,7 +40,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     EditText ET_ID, ET_password;
@@ -83,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
+/*
         // method_1.判斷用戶是否登入過
         if (Profile.getCurrentProfile() != null) {
             Profile profile = Profile.getCurrentProfile();
@@ -95,21 +93,34 @@ public class MainActivity extends AppCompatActivity {
             Log.d("TAG", "Facebook id: " + id);
             Log.d("TAG", "Facebook name: " + name);
 
+            fb_token = loginResult.getAccessToken().getToken();
+            fb_ID = loginResult.getAccessToken().getUserId();
+            type = "FB";
 
+            toServer();
             finish();
             Intent Next = new Intent(this, FunctionActivity.class);
             startActivity(Next);
-        }
+        }*/
 
         // method_2.判斷用戶是否登入過
-        /*if (AccessToken.getCurrentAccessToken() != null) {
-            Log.d(TAG, "Facebook getApplicationId: " + AccessToken.getCurrentAccessToken().getApplicationId());
-            Log.d(TAG, "Facebook getUserId: " + AccessToken.getCurrentAccessToken().getUserId());
-            Log.d(TAG, "Facebook getExpires: " + AccessToken.getCurrentAccessToken().getExpires());
-            Log.d(TAG, "Facebook getLastRefresh: " + AccessToken.getCurrentAccessToken().getLastRefresh());
-            Log.d(TAG, "Facebook getToken: " + AccessToken.getCurrentAccessToken().getToken());
-            Log.d(TAG, "Facebook getSource: " + AccessToken.getCurrentAccessToken().getSource());
-        }*/
+        if (AccessToken.getCurrentAccessToken() != null) {
+            Log.d("TAG", "Facebook getApplicationId: " + AccessToken.getCurrentAccessToken().getApplicationId());
+            Log.d("TAG", "Facebook getUserId: " + AccessToken.getCurrentAccessToken().getUserId());
+            Log.d("TAG", "Facebook getExpires: " + AccessToken.getCurrentAccessToken().getExpires());
+            Log.d("TAG", "Facebook getLastRefresh: " + AccessToken.getCurrentAccessToken().getLastRefresh());
+            Log.d("TAG", "Facebook getToken: " + AccessToken.getCurrentAccessToken().getToken());
+            Log.d("TAG", "Facebook getSource: " + AccessToken.getCurrentAccessToken().getSource());
+
+
+            fb_token = AccessToken.getCurrentAccessToken().getToken();
+            fb_ID = AccessToken.getCurrentAccessToken().getUserId();
+            type = "FB";
+
+            toServer();
+
+            loginFB();
+        }
 
 
         first();
@@ -178,8 +189,10 @@ public class MainActivity extends AppCompatActivity {
 //                                mTextDescription.setText(String.format(Locale.TAIWAN, "Name:%s\nE-mail:%s", name, email));
                             }
 
-                            Login();
+
                             toServer();
+
+
 
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -390,6 +403,19 @@ public class MainActivity extends AppCompatActivity {
         password = "";
     }
 
+    public void no_service() {
+        new AlertDialog.Builder(MainActivity.this)
+                .setTitle("無法連接伺服器")
+                .setMessage("請確認網路或稍後再試")
+                .setPositiveButton("確認", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                })
+                .show();
+    }
+
 
     public void toServer() {
 
@@ -432,6 +458,13 @@ public class MainActivity extends AppCompatActivity {
                     GlobalVariable gv = (GlobalVariable) getApplicationContext();
                     gv.setCM_Token(cmtoken);
                     gv.setCM_ID(cmuid);
+
+                    if (cmuid.equals("") || cmtoken.equals("")) {
+                        no_service();
+                    } else {
+                        Login();
+
+                    }
 
 
                 } catch (Exception e) {

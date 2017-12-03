@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.edward_liao.cranemachine">
+    package="com.nkfust.edward_liao.cranemachine">
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
@@ -10,8 +10,6 @@
         android:name="android.hardware.bluetooth_le"
         android:required="true" />
 
-
-
     <application
         android:name=".GlobalVariable"
         android:allowBackup="true"
@@ -20,8 +18,9 @@
         android:roundIcon="@mipmap/pay_icon"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-
-        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
 
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -31,11 +30,11 @@
             </intent-filter>
         </activity>
         <activity android:name=".FunctionActivity" />
-        <activity android:name=".Pay" />
         <activity android:name=".ForgotPasswordActivity" />
         <activity android:name=".Balance" />
         <activity android:name=".ChangePasswordActivity" />
-        <activity android:name=".Test"></activity>
+        <activity android:name=".Pay" />
+        <activity android:name=".Binding"></activity>
     </application>
 
 </manifest>

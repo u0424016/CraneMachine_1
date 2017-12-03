@@ -1,4 +1,4 @@
-package com.example.edward_liao.cranemachine;
+package com.nkfust.edward_liao.cranemachine;
 
 import android.app.Application;
 
