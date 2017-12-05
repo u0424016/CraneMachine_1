@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="setPay"
-            android:text="付款"
+            android:text="手機付款"
             android:textSize="18sp" />
 
         <Button
@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="setURL"
-            android:text="使用網頁版付款"
+            android:text="網頁支付"
             android:textSize="18sp" />
 
         <Button

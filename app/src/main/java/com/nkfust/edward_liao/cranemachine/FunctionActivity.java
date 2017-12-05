@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -30,6 +31,8 @@ public class FunctionActivity extends AppCompatActivity {
 
     String Status_temp;
 
+    String account_FB,account_school,account_google;
+
     String cmtoken;
     String cmuid;
 
@@ -47,10 +50,10 @@ public class FunctionActivity extends AppCompatActivity {
         GlobalVariable gv = (GlobalVariable) getApplicationContext();
 
 
-        String url = "http://163.18.2.157/balance/ID/";
+        String url = "http://163.18.2.157/getuser/";
         cmuid = gv.getCM_ID();
-
-        get_url = url + cmuid;
+        cmtoken = gv.getCM_Token();
+        get_url = url + cmuid + "/"+cmtoken;
         Log.d("TAG", get_url);
 
         getBalance();
@@ -145,9 +148,35 @@ public class FunctionActivity extends AppCompatActivity {
     }
 
     public void setBinding(View view) {
-        finish();
-        Intent binding = new Intent(this, Binding.class);
-        startActivity(binding);
+
+
+        if(account_school.equals("null")||account_FB.equals("null")){
+
+            if(account_FB.equals("null")){
+
+                Intent binding_FB = new Intent(this, BindingFacebook.class);
+                startActivity(binding_FB);
+
+
+
+            }else if(account_school.equals("null")){
+                finish();
+                Intent binding = new Intent(this, Binding.class);
+                startActivity(binding);
+            }
+
+
+
+
+
+        }else{
+            Toast.makeText(this, "帳戶已綁定!", Toast.LENGTH_SHORT).show();
+
+        }
+
+
+
+
     }
 
     public void setAboutApp(View view) {
@@ -182,6 +211,15 @@ public class FunctionActivity extends AppCompatActivity {
                     JSONObject responseJSON = new JSONObject(responseString);
                     //取得Balance的屬性
                     int Balance = responseJSON.getInt("balance");
+                    account_FB = responseJSON.getString("account_FB");
+                    account_google = responseJSON.getString("account_google");
+                    account_school = responseJSON.getString("account_school");
+                    Log.d("TAG", "FB帳戶狀態：" + account_FB);
+                    Log.d("TAG", "Google帳戶狀態：" + account_google);
+                    Log.d("TAG", "學校帳戶狀態：" + account_school);
+
+
+
 
 
                     GlobalVariable gv = (GlobalVariable) getApplicationContext();

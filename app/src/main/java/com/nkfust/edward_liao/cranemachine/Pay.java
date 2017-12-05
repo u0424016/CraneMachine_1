@@ -164,7 +164,7 @@ public class Pay extends AppCompatActivity {
                     @Override
                     public void run() {
 
-                        //過0.5秒後要做的事情
+                        //過1秒後要做的事情
 
                         textView2.setText("連接中，請稍候");
 
@@ -173,7 +173,7 @@ public class Pay extends AppCompatActivity {
                         textView2.setText("已連接");
 
                     }
-                }, 500);
+                }, 1000);
 
 
 //                read();
@@ -499,6 +499,11 @@ public class Pay extends AppCompatActivity {
             }
 
 
+        }else{
+
+            Toast.makeText(this, "無法連接裝置，請檢查藍牙或重新啟動!", Toast.LENGTH_SHORT).show();
+
+
         }
 
 
@@ -601,7 +606,7 @@ public class Pay extends AppCompatActivity {
                 try {
                     //建立要傳送的JSON物件
                     JSONObject json = new JSONObject();
-                    json.put("data", "7c4cd77c8fdb327126eac5e6d1fec59666614f8d5ef6d22ca2cd89b7846034c02e0f4701c15e270e30a565291845bbdad87a7f65cbc8f6ece1faa5c2be226bc4");
+                    json.put("data", "7c4cd77c8fdb327126eac5e6d1fec59657ef2abd308152935d874340a5bba74a2bf3857b6eb49b7e9f38f26809d4a243");
                     json.put("CMtoken", cmtoken);
                     json.put("CMUID", cmuid);
 

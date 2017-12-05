@@ -13,6 +13,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -44,7 +45,6 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     EditText ET_ID, ET_password;
     Button login, clean, button_newuser;
-    String ID, password;
 
     private AccessToken accessToken;
     // FB
@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
     String fb_token;
     String fb_ID, nkfust_ID, nkfust_password;
     String type;
+    String status;
 
 
     String cmtoken;
@@ -90,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
             type = "FB";
 
             loginFB();
+
         }
 
 
@@ -126,24 +128,6 @@ public class MainActivity extends AppCompatActivity {
         }*/
 
 
-        clean = (Button) findViewById(R.id.button_clean);
-        clean.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-
-
-                i = i + 1;
-
-                if (i == 7) {
-                    button_newuser = (Button) findViewById(R.id.button_newuser);
-
-                    button_newuser.setVisibility(View.VISIBLE);
-                }
-
-
-            }
-        });
-
-
     }
 
 
@@ -157,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
          * 5. WEB_VIEW_ONLY
          * 6. DEVICE_AUTH
          */
-        loginManager.setLoginBehavior(LoginBehavior.NATIVE_WITH_FALLBACK);
+        loginManager.setLoginBehavior(LoginBehavior.NATIVE_ONLY);
         // 設定要跟用戶取得的權限，以下3個是基本可以取得，不需要經過FB的審核
         List<String> permissions = new ArrayList<>();
         permissions.add("public_profile");
@@ -192,14 +176,14 @@ public class MainActivity extends AppCompatActivity {
                             if (response.getConnection().getResponseCode() == 200) {
                                 long id = object.getLong("id");
                                 String name = object.getString("name");
-                                String email = object.getString("email");
+//                                String email = object.getString("email");
                                 Log.d("TAG", "Facebook id:" + id);
                                 Log.d("TAG", "Facebook name:" + name);
-                                Log.d("TAG", "Facebook email:" + email);
+//                                Log.d("TAG", "Facebook email:" + email);
                                 // 此時如果登入成功，就可以順便取得用戶大頭照
-                                Profile profile = Profile.getCurrentProfile();
-                                // 設定大頭照大小
-                                Uri userPhoto = profile.getProfilePictureUri(300, 300);
+//                                Profile profile = Profile.getCurrentProfile();
+//                                // 設定大頭照大小
+//                                Uri userPhoto = profile.getProfilePictureUri(300, 300);
 //                                Glide.with(MainActivity.this)
 //                                        .load(userPhoto.toString())
 //                                        .crossFade()
@@ -315,24 +299,21 @@ public class MainActivity extends AppCompatActivity {
         GlobalVariable gv = (GlobalVariable) getApplicationContext();
 
         //取得帳號
-        ID = ET_ID.getText().toString();
+        nkfust_ID = ET_ID.getText().toString();
         //儲存帳號
-        gv.setId(ID);
+        gv.setId(nkfust_ID);
 
         //取得密碼
-        password = ET_password.getText().toString();
+        nkfust_password = ET_password.getText().toString();
         //儲存密碼
-        gv.setPassword(password);
-
-        //將帳號密碼傳送至伺服器檢查
-        login_to_server();
+        gv.setPassword(nkfust_password);
 
 
-        if (ID.equals("") && password.equals("")) {
+        if (nkfust_ID.equals("") || nkfust_password.equals("")) {
 
             new AlertDialog.Builder(MainActivity.this)
                     .setTitle("錯誤")
-                    .setMessage("帳號密碼不可為空請輸入正確的密碼!")
+                    .setMessage("帳號及密碼不可為空請輸入正確的密碼!")
                     .setIcon(R.mipmap.ic_launcher_round)
                     .setNegativeButton("確定",
                             new DialogInterface.OnClickListener() {
@@ -345,81 +326,12 @@ public class MainActivity extends AppCompatActivity {
                             }).show();
 
 
-        } else if (ID.equals("nkfust") && password.equals("")) {
+        } else {
+
+            //將帳號密碼傳送至伺服器檢查
+            login_to_server();
 
 
-            finish();
-            Intent Next = new Intent(this, FunctionActivity.class);
-            startActivity(Next);
-
-            
-        } else if (ID.equals("nkfust") && !password.equals("")) {
-            if (password.equals("")) {
-                new AlertDialog.Builder(MainActivity.this)
-                        .setTitle("密碼錯誤")
-                        .setMessage("密碼不可為空白。請輸入正確的密碼!")
-                        .setIcon(R.mipmap.ic_launcher_round)
-                        .setNegativeButton("確定",
-                                new DialogInterface.OnClickListener() {
-
-                                    @Override
-                                    public void onClick(DialogInterface dialog,
-                                                        int which) {
-                                        // TODO Auto-generated method stub
-                                    }
-                                }).show();
-                ET_password.setText("");
-            } else {
-                new AlertDialog.Builder(MainActivity.this)
-                        .setTitle("密碼錯誤")
-                        .setMessage("請輸入正確的密碼!")
-                        .setIcon(R.mipmap.ic_launcher_round)
-                        .setNegativeButton("確定",
-                                new DialogInterface.OnClickListener() {
-
-                                    @Override
-                                    public void onClick(DialogInterface dialog,
-                                                        int which) {
-                                        // TODO Auto-generated method stub
-                                    }
-                                }).show();
-                ET_ID.setText("");
-                ET_password.setText("");
-            }
-        } else if (!ID.equals("nkfust")) {
-            if (password.equals("")) {
-
-                new AlertDialog.Builder(MainActivity.this)
-                        .setTitle("密碼錯誤")
-                        .setMessage("密碼不可為空白。請輸入正確的密碼!")
-                        .setIcon(R.mipmap.ic_launcher_round)
-                        .setNegativeButton("確定",
-                                new DialogInterface.OnClickListener() {
-
-                                    @Override
-                                    public void onClick(DialogInterface dialog,
-                                                        int which) {
-                                        // TODO Auto-generated method stub
-                                    }
-                                }).show();
-                ET_password.setText("");
-            } else {
-                new AlertDialog.Builder(MainActivity.this)
-                        .setTitle("錯誤")
-                        .setMessage("請重新輸入正確的帳號密碼!")
-                        .setIcon(R.mipmap.ic_launcher_round)
-                        .setNegativeButton("確定",
-                                new DialogInterface.OnClickListener() {
-
-                                    @Override
-                                    public void onClick(DialogInterface dialog,
-                                                        int which) {
-                                        // TODO Auto-generated method stub
-                                    }
-                                }).show();
-                ET_ID.setText("");
-                ET_password.setText("");
-            }
         }
     }
 
@@ -431,10 +343,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setClean(View view) {
+
+        i = i + 1;
+
+        if (i == 7) {
+            button_newuser = (Button) findViewById(R.id.button_newuser);
+
+            button_newuser.setVisibility(View.VISIBLE);
+        }
+
+
         ET_ID.setText("");
         ET_password.setText("");
-        ID = "";
-        password = "";
+        nkfust_ID = "";
+        nkfust_password = "";
     }
 
     public void no_service() {
@@ -448,6 +370,15 @@ public class MainActivity extends AppCompatActivity {
                     }
                 })
                 .show();
+    }
+
+    public void fail() {
+
+        ET_password.setText("");
+
+        ET_password.setHint("密碼錯誤 請重新輸入");
+
+
     }
 
 
@@ -523,9 +454,9 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     //建立要傳送的JSON物件
                     JSONObject json = new JSONObject();
-                    json.put("ID", nkfust_ID);
-                    json.put("ID", nkfust_password);
-                    json.put("Type", type);
+                    json.put("NKID", nkfust_ID);
+                    json.put("NKpassword", nkfust_password);
+                    json.put("Type", "NK");
 
 
                     //建立POST Request
@@ -543,20 +474,42 @@ public class MainActivity extends AppCompatActivity {
                     //回傳的內容轉存為JSON物件
                     JSONObject responseJSON = new JSONObject(responseString);
                     //取得Message的屬性
-                    cmtoken = responseJSON.getString("CMtoken");
-                    cmuid = responseJSON.getString("CMUID");
+                    status = responseJSON.getString("Status");
 
-                    Log.d("TAG", "CMtoken: " + cmtoken);
-                    Log.d("TAG", "CMUID: " + cmuid);
 
-                    GlobalVariable gv = (GlobalVariable) getApplicationContext();
-                    gv.setCM_Token(cmtoken);
-                    gv.setCM_ID(cmuid);
+                    if (status.equals("Success")) {
 
-                    if (cmuid.equals("") || cmtoken.equals("")) {
-                        no_service();
+                        cmtoken = responseJSON.getString("CMtoken");
+                        cmuid = responseJSON.getString("CMUID");
+
+                        GlobalVariable gv = (GlobalVariable) getApplicationContext();
+                        gv.setCM_Token(cmtoken);
+                        gv.setCM_ID(cmuid);
+
+
+                        Log.d("TAG", "CMtoken: " + cmtoken);
+                        Log.d("TAG", "CMUID: " + cmuid);
+                        Log.d("TAG", "登入狀態: " + status);
+
+                        if (cmuid.equals("null") && cmtoken.equals("null")) {
+                            no_service();
+                        } else {
+                            Login();
+
+                        }
+
+
+                    } else if (status.equals("PasswordError")) {
+
+                        Log.d("TAG", "登入狀態: " + status);
+
+                        Log.d("TAG", "密碼錯誤");
+
+                        ET_password.setText("");
+
+
                     } else {
-                        Login();
+                        no_service();
 
                     }
 
@@ -570,5 +523,6 @@ public class MainActivity extends AppCompatActivity {
         }.execute(null, null, null);
 
     }
+
 
 }
