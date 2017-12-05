@@ -27,7 +27,17 @@
             android:textSize="18sp" />
 
         <Button
+            android:id="@+id/button_url"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="setURL"
+            android:text="使用網頁版付款"
+            android:textSize="18sp" />
+
+        <Button
             android:id="@+id/button_balance"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -37,12 +47,21 @@
 
         <Button
             android:id="@+id/button_binding"
-            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="setBinding"
             android:text="帳戶綁定"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/button_aboutApp"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="setAboutApp"
+            android:text="圖資館週活動說明"
             android:textSize="18sp" />
 
         <Button
@@ -63,15 +82,6 @@
             android:onClick="setLogout"
             android:text="登出"
             android:textSize="18sp" />
-
-        <com.facebook.login.widget.LoginButton
-            android:id="@+id/logout_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_weight="1"
-            android:textSize="18sp"
-            android:visibility="invisible" />
 
     </LinearLayout>
 

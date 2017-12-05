@@ -43,7 +43,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     EditText ET_ID, ET_password;
-    Button login, clean;
+    Button login, clean, button_newuser;
     String ID, password;
 
     private AccessToken accessToken;
@@ -52,12 +52,14 @@ public class MainActivity extends AppCompatActivity {
     public static CallbackManager callbackManager;
 
     String fb_token;
-    String fb_ID;
+    String fb_ID, nkfust_ID, nkfust_password;
     String type;
 
 
     String cmtoken;
     String cmuid;
+
+    int i = 0;
 
 
     @Override
@@ -72,6 +74,26 @@ public class MainActivity extends AppCompatActivity {
         // init LoginManager & CallbackManager
         loginManager = LoginManager.getInstance();
         callbackManager = CallbackManager.Factory.create();
+
+        // method_2.判斷用戶是否登入過
+        if (AccessToken.getCurrentAccessToken() != null) {
+            Log.d("TAG", "Facebook 應用程式ID: " + AccessToken.getCurrentAccessToken().getApplicationId());
+            Log.d("TAG", "Facebook 使用者ID: " + AccessToken.getCurrentAccessToken().getUserId());
+            Log.d("TAG", "Facebook getExpires: " + AccessToken.getCurrentAccessToken().getExpires());
+            Log.d("TAG", "Facebook getLastRefresh: " + AccessToken.getCurrentAccessToken().getLastRefresh());
+            Log.d("TAG", "Facebook 使用者Token: " + AccessToken.getCurrentAccessToken().getToken());
+            Log.d("TAG", "Facebook getSource: " + AccessToken.getCurrentAccessToken().getSource());
+
+
+            fb_token = AccessToken.getCurrentAccessToken().getToken();
+            fb_ID = AccessToken.getCurrentAccessToken().getUserId();
+            type = "FB";
+
+            loginFB();
+        }
+
+
+        first();
 
         findViewById(R.id.login_button).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -103,27 +125,23 @@ public class MainActivity extends AppCompatActivity {
             startActivity(Next);
         }*/
 
-        // method_2.判斷用戶是否登入過
-        if (AccessToken.getCurrentAccessToken() != null) {
-            Log.d("TAG", "Facebook getApplicationId: " + AccessToken.getCurrentAccessToken().getApplicationId());
-            Log.d("TAG", "Facebook getUserId: " + AccessToken.getCurrentAccessToken().getUserId());
-            Log.d("TAG", "Facebook getExpires: " + AccessToken.getCurrentAccessToken().getExpires());
-            Log.d("TAG", "Facebook getLastRefresh: " + AccessToken.getCurrentAccessToken().getLastRefresh());
-            Log.d("TAG", "Facebook getToken: " + AccessToken.getCurrentAccessToken().getToken());
-            Log.d("TAG", "Facebook getSource: " + AccessToken.getCurrentAccessToken().getSource());
+
+        clean = (Button) findViewById(R.id.button_clean);
+        clean.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
 
 
-            fb_token = AccessToken.getCurrentAccessToken().getToken();
-            fb_ID = AccessToken.getCurrentAccessToken().getUserId();
-            type = "FB";
+                i = i + 1;
 
-            toServer();
+                if (i == 7) {
+                    button_newuser = (Button) findViewById(R.id.button_newuser);
 
-            loginFB();
-        }
+                    button_newuser.setVisibility(View.VISIBLE);
+                }
 
 
-        first();
+            }
+        });
 
 
     }
@@ -191,7 +209,6 @@ public class MainActivity extends AppCompatActivity {
 
 
                             toServer();
-
 
 
                         } catch (IOException e) {
@@ -276,6 +293,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void AmdinLogin(View view) {
+
+        button_newuser.setVisibility(View.INVISIBLE);
+
         finish();
         Intent Next = new Intent(this, FunctionActivity.class);
         startActivity(Next);
@@ -293,10 +313,20 @@ public class MainActivity extends AppCompatActivity {
     public void setLogin(View view) {
 
         GlobalVariable gv = (GlobalVariable) getApplicationContext();
-        String password_GV = gv.getPassword();
 
+        //取得帳號
         ID = ET_ID.getText().toString();
+        //儲存帳號
+        gv.setId(ID);
+
+        //取得密碼
         password = ET_password.getText().toString();
+        //儲存密碼
+        gv.setPassword(password);
+
+        //將帳號密碼傳送至伺服器檢查
+        login_to_server();
+
 
         if (ID.equals("") && password.equals("")) {
 
@@ -315,11 +345,15 @@ public class MainActivity extends AppCompatActivity {
                             }).show();
 
 
-        } else if (ID.equals("nkfust") && password.equals(password_GV)) {
+        } else if (ID.equals("nkfust") && password.equals("")) {
+
+
             finish();
             Intent Next = new Intent(this, FunctionActivity.class);
             startActivity(Next);
-        } else if (ID.equals("nkfust") && !password.equals(password_GV)) {
+
+            
+        } else if (ID.equals("nkfust") && !password.equals("")) {
             if (password.equals("")) {
                 new AlertDialog.Builder(MainActivity.this)
                         .setTitle("密碼錯誤")
@@ -390,9 +424,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setForgotPassword(View view) {
-        finish();
-        Intent Forgot = new Intent(this, ForgotPasswordActivity.class);
-        startActivity(Forgot);
+        Uri uri = Uri.parse("https://ccms.nkfust.edu.tw/password_forget.html");
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        startActivity(intent);
 
     }
 
@@ -476,4 +510,65 @@ public class MainActivity extends AppCompatActivity {
         }.execute(null, null, null);
 
     }
+
+    public void login_to_server() {
+
+
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                // TODO Auto-generated method stub
+
+                try {
+                    //建立要傳送的JSON物件
+                    JSONObject json = new JSONObject();
+                    json.put("ID", nkfust_ID);
+                    json.put("ID", nkfust_password);
+                    json.put("Type", type);
+
+
+                    //建立POST Request
+                    HttpClient httpClient = new DefaultHttpClient();
+                    HttpPost httpPost = new HttpPost("http://163.18.2.157:80/gettoken");
+                    //JSON物件放到POST Request
+                    StringEntity stringEntity = new StringEntity(json.toString());
+                    stringEntity.setContentType("application/json");
+                    httpPost.setEntity(stringEntity);
+                    //執行POST Request
+                    HttpResponse httpResponse = httpClient.execute(httpPost);
+                    //取得回傳的內容
+                    HttpEntity httpEntity = httpResponse.getEntity();
+                    String responseString = EntityUtils.toString(httpEntity, "UTF-8");
+                    //回傳的內容轉存為JSON物件
+                    JSONObject responseJSON = new JSONObject(responseString);
+                    //取得Message的屬性
+                    cmtoken = responseJSON.getString("CMtoken");
+                    cmuid = responseJSON.getString("CMUID");
+
+                    Log.d("TAG", "CMtoken: " + cmtoken);
+                    Log.d("TAG", "CMUID: " + cmuid);
+
+                    GlobalVariable gv = (GlobalVariable) getApplicationContext();
+                    gv.setCM_Token(cmtoken);
+                    gv.setCM_ID(cmuid);
+
+                    if (cmuid.equals("") || cmtoken.equals("")) {
+                        no_service();
+                    } else {
+                        Login();
+
+                    }
+
+
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        }.execute(null, null, null);
+
+    }
+
 }

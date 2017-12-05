@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <uses-feature
         android:name="android.hardware.bluetooth_le"
@@ -34,7 +35,8 @@
         <activity android:name=".Balance" />
         <activity android:name=".ChangePasswordActivity" />
         <activity android:name=".Pay" />
-        <activity android:name=".Binding"></activity>
+        <activity android:name=".Binding" />
+        <activity android:name=".AboutApp"></activity>
     </application>
 
 </manifest>

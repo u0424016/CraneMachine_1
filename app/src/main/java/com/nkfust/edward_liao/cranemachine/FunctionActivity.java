@@ -3,6 +3,7 @@ package com.nkfust.edward_liao.cranemachine;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -23,7 +24,7 @@ import static com.nkfust.edward_liao.cranemachine.MainActivity.loginManager;
 
 public class FunctionActivity extends AppCompatActivity {
 
-    Button pay, balance, deposit, withdraw, transfer, changepassword,binding, logout;
+    Button pay, balance, deposit, withdraw, transfer, changepassword, binding, url, logout;
 
     int money_total;
 
@@ -94,30 +95,6 @@ public class FunctionActivity extends AppCompatActivity {
 
     }
 
-    /*
-        //前往存款畫面
-        public void setDeposit(View view) {
-            finish();
-            Intent Deposit = new Intent(this, Deposit.class);
-            startActivity(Deposit);
-
-        }
-
-        //前往提款畫面
-        public void setWithdraw(View view) {
-            finish();
-            Intent Withdraw = new Intent(this, Withdraw.class);
-            startActivity(Withdraw);
-
-        }
-
-        //前往轉帳畫面
-        public void setTransfer(View view) {
-            finish();
-            Intent Transfer = new Intent(this, Transfer.class);
-            startActivity(Transfer);
-        }
-    */
     //前往登出畫面
     public void setLogout(View view) {
 
@@ -154,15 +131,28 @@ public class FunctionActivity extends AppCompatActivity {
     }
 
     public void setChangepassword(View view) {
-        finish();
-        Intent changepassword = new Intent(this, ChangePasswordActivity.class);
-        startActivity(changepassword);
+        Uri uri = Uri.parse("https://ccms.nkfust.edu.tw/index.int.html");
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        startActivity(intent);
+    }
+
+    public void setURL(View view) {
+
+        Uri uri = Uri.parse("http://163.18.2.157:8880");
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        startActivity(intent);
+
     }
 
     public void setBinding(View view) {
         finish();
         Intent binding = new Intent(this, Binding.class);
         startActivity(binding);
+    }
+
+    public void setAboutApp(View view) {
+        Intent aboutApp = new Intent(this, AboutApp.class);
+        startActivity(aboutApp);
     }
 
 
@@ -200,9 +190,7 @@ public class FunctionActivity extends AppCompatActivity {
 
                     gv.setMoney_total(money_total);
 
-
-                    System.out.print("帳戶餘額：");
-                    System.out.println(money_total);
+                    Log.d("TAG", "帳戶餘額：" + money_total);
 
 
                 } catch (Exception e) {

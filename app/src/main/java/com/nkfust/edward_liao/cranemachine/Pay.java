@@ -19,6 +19,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -49,9 +50,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+
+import android.support.v4.app.ActivityCompat;
+import android.Manifest;
+import android.content.pm.PackageManager;
+
+import static android.Manifest.permission.*;
+
 public class Pay extends AppCompatActivity {
 
-    private Activity Test;
+    private Activity Pay;
 
 
     BluetoothManager btManager;
@@ -113,8 +121,22 @@ public class Pay extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pay);
 
+
+        //檢查是否取得權限
+
+        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+
+//沒有權限時
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(Pay.this, new String[]{Manifest.permission.CAMERA}, 1);
+        } else {
+            Toast.makeText(this, "請掃描QRCode!", Toast.LENGTH_SHORT).show();
+        }
+
+
         this.textView2 = (TextView) findViewById(R.id.textView2);
-        this.Test = this;
+        this.Pay = this;
 
 
         GlobalVariable gv = (GlobalVariable) getApplicationContext();
@@ -136,15 +158,13 @@ public class Pay extends AppCompatActivity {
                 textView2.setText("付款成功");
 
 
-
-
                 Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
 
                     @Override
                     public void run() {
 
-                        //過1秒後要做的事情
+                        //過0.5秒後要做的事情
 
                         textView2.setText("連接中，請稍候");
 
@@ -153,7 +173,7 @@ public class Pay extends AppCompatActivity {
                         textView2.setText("已連接");
 
                     }
-                }, 1000);
+                }, 500);
 
 
 //                read();
@@ -198,7 +218,7 @@ public class Pay extends AppCompatActivity {
         button_qrcode.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 //先掃描QRCode
-                IntentIntegrator scanIntegrator = new IntentIntegrator(Test);
+                IntentIntegrator scanIntegrator = new IntentIntegrator(Pay);
                 scanIntegrator.initiateScan();
             }
         });
@@ -241,24 +261,28 @@ public class Pay extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
         if (scanningResult != null) {
+
+
             String scanContent = scanningResult.getContents();
 
+            if (scanContent.equals("")) {
 
-            try {
-                JSONObject jsonObject = new JSONObject(scanContent);
-
-                String MacAddress = jsonObject.getString("MacAddress");
-
-                ScanContent = MacAddress;
+                Toast.makeText(getApplicationContext(), "請重新掃描", Toast.LENGTH_SHORT).show();
 
 
-            } catch (JSONException e) {
-                e.printStackTrace();
+            } else {
 
+                String MacAddress = scanContent;
+
+
+                System.out.println(MacAddress.subSequence(44, 61));
+
+                ScanContent = MacAddress.subSequence(44, 61).toString();
+
+
+                startScanning();
 
             }
-
-            startScanning();
 
 
         } else {
@@ -450,7 +474,6 @@ public class Pay extends AppCompatActivity {
 
                 button_yes.setVisibility(View.VISIBLE);
                 button_qrcode.setVisibility(View.INVISIBLE);
-
 
 
 //                Handler handler = new Handler();

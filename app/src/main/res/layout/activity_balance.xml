@@ -13,7 +13,14 @@
         android:orientation="vertical"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="200dp">
+        android:layout_marginTop="100dp">
+
+        <ImageView
+            android:id="@+id/imageView4"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_weight="1"
+            app:srcCompat="@mipmap/coin" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -24,7 +31,7 @@
                 android:id="@+id/textView5"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="餘額:  TWN"
+                android:text="餘額:  CHI幣"
                 android:textSize="24sp" />
 
             <TextView

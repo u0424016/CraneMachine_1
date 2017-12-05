@@ -19,7 +19,7 @@ public class GlobalVariable extends Application {
 
 
 
-    private String password = "abc1234";
+    private String password = "";
 
     public void setPassword(String password){this.password=password;}
 
@@ -27,7 +27,7 @@ public class GlobalVariable extends Application {
 
 
 
-    private String id = "nkfust";
+    private String id = "";
 
     public void setId(String id){this.id=id;}
 
